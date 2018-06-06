@@ -1,13 +1,21 @@
 package com.spring.mvc.email;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.omg.CORBA.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamSource;
@@ -23,6 +31,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class EmailController {
+
+	final String APIKey="6CAA20423FDF8159B27CB6620B0A07";//Dang ky tai khoan tai esms.vn de lay Key
+	final String SecretKey="78229B4D4CBAA86971C2F284BF099E";
 
 	public static String emailToReceive, emailSubject, emailMessage;// dia chi
 																	// nguoi
@@ -41,6 +52,12 @@ public class EmailController {
 	@RequestMapping(value = { "/", "emailForm" }, method = RequestMethod.GET)
 	public ModelAndView showEmailForm() {
 		modelAndView = new ModelAndView("emailForm");// request to emailForm.jsp
+		return modelAndView;
+	}
+
+	@RequestMapping(value = { "messageForm" }, method = RequestMethod.GET)
+	public ModelAndView showMessageForm() {
+		modelAndView = new ModelAndView("messageForm");// request to emailForm.jsp
 		return modelAndView;
 	}
 
@@ -114,4 +131,72 @@ public class EmailController {
 		return modelAndView;
 	}
 
+
+	@RequestMapping(value = { "sendMessage" }, method = RequestMethod.POST)
+	public ModelAndView sendMessage(HttpServletRequest request) {
+		String phoneNumber = request.getParameter("messageTo");
+		String messageText = request.getParameter("messageText");
+		System.out.println("\nPhone number to?= " + phoneNumber +  ", Message?= "
+				+ messageText + "\n");
+
+		try {
+			sendGetJSON(phoneNumber, messageText);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		System.out.println("\nMessage Send Successfully.... Hurrey!\n");
+		modelAndView = new ModelAndView("success", "messageObj", "Thank You! Your Message Has Been Sent!");
+		return modelAndView;
+	}
+
+	public String sendGetJSON(String phoneNumber, String message) throws IOException {
+
+		String url = "http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_get?ApiKey=" + URLEncoder.encode(APIKey, "UTF-8") + "&SecretKey=" + URLEncoder.encode(SecretKey, "UTF-8") + "&SmsType=8&Phone=" + URLEncoder.encode(phoneNumber, "UTF-8") + "&Content=" + URLEncoder.encode(message, "UTF-8");
+
+		URL obj;
+		try {
+			obj = new URL(url);
+
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			//you need to encode ONLY the values of the parameters
+
+			con.setRequestMethod("GET");
+			con.setRequestProperty("Accept", "application/json");
+
+			int responseCode = con.getResponseCode();
+			System.out.println("\nSending 'GET' request to URL : " + url);
+			System.out.println("Response Code : " + responseCode);
+			if(responseCode==200)//Đã gọi URL thành công, tuy nhiên bạn phải tự kiểm tra CodeResult xem tin nhắn có gửi thành công không, vì có thể tài khoản bạn không đủ tiền thì sẽ thất bại
+			{
+				//Check CodeResult from response
+			}
+			//Đọc Response
+			BufferedReader in = new BufferedReader(
+			        new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			//print result
+			JSONObject json = (JSONObject)new JSONParser().parse(response.toString());
+			System.out.println("CodeResult=" + json.get("CodeResult"));
+			System.out.println("SMSID=" + json.get("SMSID"));
+			System.out.println("ErrorMessage=" + json.get("ErrorMessage"));
+		//document.getElementsByTagName("CountRegenerate").item(0).va
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "SUCCESS";
+
+	}
 }

@@ -17,6 +17,7 @@
 <body>
 <center>
             <h2>Spring MVC Email Example</h2>
+            <a href="messageForm">Send Message</a>
             <form id="sendEmailForm" method="post" action="sendEmail" enctype="multipart/form-data">
                 <table id="emailFormBeanTable" border="0" width="80%">
                     <tr>
