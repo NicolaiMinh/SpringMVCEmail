@@ -14,7 +14,7 @@ import java.util.List;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.omg.CORBA.Request;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class EmailController {
 
 	final String APIKey="6CAA20423FDF8159B27CB6620B0A07";//Dang ky tai khoan tai esms.vn de lay Key
-	final String SecretKey="78229B4D4CBAA86971C2F284BF099E";
+	final String SecretKey="78229B4D4CBAA86971C2F284BF099E"; 
 
 	public static String emailToReceive, emailSubject, emailMessage;// dia chi
 																	// nguoi
@@ -168,11 +168,14 @@ public class EmailController {
 			int responseCode = con.getResponseCode();
 			System.out.println("\nSending 'GET' request to URL : " + url);
 			System.out.println("Response Code : " + responseCode);
-			if(responseCode==200)//Đã gọi URL thành công, tuy nhiên bạn phải tự kiểm tra CodeResult xem tin nhắn có gửi thành công không, vì có thể tài khoản bạn không đủ tiền thì sẽ thất bại
+			if(responseCode==200)//Ä�Ã£ gá»�i URL thÃ nh cÃ´ng, tuy nhiÃªn báº¡n pháº£i tá»± kiá»ƒm tra CodeResult xem tin nháº¯n cÃ³ gá»­i thÃ nh cÃ´ng khÃ´ng, vÃ¬ cÃ³ thá»ƒ tÃ i khoáº£n báº¡n khÃ´ng Ä‘á»§ tiá»�n thÃ¬ sáº½ tháº¥t báº¡i
 			{
+				System.out.println("Send message succesfull!!");
 				//Check CodeResult from response
+			}else{
+				System.out.println("Send message fail!!");
 			}
-			//Đọc Response
+			//Ä�á»�c Response
 			BufferedReader in = new BufferedReader(
 			        new InputStreamReader(con.getInputStream()));
 			String inputLine;
